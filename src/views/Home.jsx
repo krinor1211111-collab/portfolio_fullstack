@@ -1,16 +1,39 @@
-import React, { useContext } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import heroBg from "../assets/webdev.svg";
-import Typical from "react-typical";
-import { contactLinks } from "../constants";
 import { ThemeContext } from "../themeProvider";
 import { motion } from "framer-motion";
 import { Link } from "react-scroll";
 import cloud from "../assets/cloudBg.png";
 import cloudDark from "../assets/cloudDark.png";
 
+const TYPING_TEXT = "Mobile Developer";
+const TYPING_SPEED_MS = 120;
+const PAUSE_MS = 2000;
+
 const Home = () => {
   const theme = useContext(ThemeContext);
   const darkMode = theme.state.darkMode;
+  const [typed, setTyped] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!isDeleting && typed.length < TYPING_TEXT.length) {
+      const t = setTimeout(() => setTyped(TYPING_TEXT.slice(0, typed.length + 1)), TYPING_SPEED_MS);
+      return () => clearTimeout(t);
+    }
+    if (!isDeleting && typed.length === TYPING_TEXT.length) {
+      const t = setTimeout(() => setIsDeleting(true), PAUSE_MS);
+      return () => clearTimeout(t);
+    }
+    if (isDeleting && typed.length > 0) {
+      const t = setTimeout(() => setTyped(typed.slice(0, -1)), TYPING_SPEED_MS / 2);
+      return () => clearTimeout(t);
+    }
+    if (isDeleting && typed.length === 0) {
+      setIsDeleting(false);
+    }
+  }, [typed, isDeleting]);
+
   return (
     <>
       <div
@@ -32,13 +55,8 @@ const Home = () => {
                 Hi, I am James
               </motion.span>
               <span className="block text-blue-500 z-0 lg:inline">
-                <Typical
-                  steps={[
-                    "Mobile Developer",
-                    1000,
-                  ]}
-                  loop={Infinity}
-                />
+                {typed}
+                <span className="animate-pulse">|</span>
               </span>
             </h1>
             <p
